@@ -37,55 +37,23 @@
  */
 package com.moss.maven.util;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
+import java.io.ByteArrayInputStream;
 
 import junit.framework.TestCase;
 
-public class TestArtifactFinder extends TestCase {
-
-	public void testArtifactFinder() throws Exception {
-		class TestCase {
-			final SimpleArtifact artifact;
-			final String expectedPath;
-			public TestCase(SimpleArtifact artifact, String expectedPath) {
-				super();
-				this.artifact = artifact;
-				this.expectedPath = expectedPath;
-			}
-		}
-		
-		List<TestCase> testCases = Arrays.asList(
-				new TestCase(
-						new SimpleArtifact("com.myco.mygroup", "myartifact", "38.3.2-SNAPSHOT", "special", "uberbundle"),
-						"/com/myco/mygroup/myartifact/38.3.2-SNAPSHOT/myartifact-38.3.2-SNAPSHOT-special.uberbundle"),
-				new TestCase(
-						new SimpleArtifact("g", "a", "1", null, null),
-						"/g/a/1/a-1.jar"),
-				new TestCase(
-						new SimpleArtifact("g", "a", "1", null, "widgetzip"),
-						"/g/a/1/a-1.widgetzip"),
-				new TestCase(
-						new SimpleArtifact("g", "a", "1", "withsecretsauce", null),
-						"/g/a/1/a-1-withsecretsauce.jar")
-				);
-		
-		
+public class SettingsText extends TestCase {
+	
+	public void testIt(){
 		// given
-		final SimpleArtifactFinder finder = new SimpleArtifactFinder(new Properties(){{
-			put("user.home", "/some/nonexistent/user/home");
-		}});
+		String settingsFile = 
+				"<settings>\n" +
+					"<localRepository>/path/to/my/local/repo</localRepository>\n" +
+				"</settings>";
+		// when
+		Settings settings = new Settings(new ByteArrayInputStream(settingsFile.getBytes()));
 		
-		for(TestCase testCase : testCases){
-			// when
-			File file = finder.findLocal(testCase.artifact);
-			
-			// then
-			assertEquals("/some/nonexistent/user/home/.m2/repository" + testCase.expectedPath, file.toString());
-		}
-		
+		// then
+		assertEquals("/path/to/my/local/repo", settings.localRepository);
 	}
 	
 }

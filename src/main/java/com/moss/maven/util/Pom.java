@@ -37,6 +37,8 @@
  */
 package com.moss.maven.util;
 
+import static com.moss.maven.util.impl.DomUtil.findNamedChildNode;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
@@ -118,15 +120,6 @@ public class Pom {
 	
 	public Dependency getParent() {
 		return parent;
-	}
-	private Node findNamedChildNode(String name, Node parent){
-		NodeList nodes = parent.getChildNodes();
-		for (int x=0;x<nodes.getLength();x++){
-			if(nodes.item(x).getNodeName().equals(name)){
-				return nodes.item(x);
-			}
-		}
-		return null;
 	}
 	public String getArtifactId() {
 		return artifactId;

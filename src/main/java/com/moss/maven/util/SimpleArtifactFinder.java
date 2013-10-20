@@ -47,38 +47,48 @@ public class SimpleArtifactFinder {
 	
 	private static final String DEFAULT_ARTIFACT_TYPE = "jar";
 	
-	/**
-	 * Find an artifact file in the local repository. Assumes the local repository is located
-	 * at ${user.home}/.m2/repository.
-	 * @param artifact - note that the classifier property of this class may be null, in
-	 * which case it is ignored, but the rest of the properties in this class must be non-null.
-	 * @returns The file of an artifact in the local repository.
-	 */
+	
+	private final Properties systemProperties;
+	
+	public SimpleArtifactFinder() {
+		this(System.getProperties());
+	}
+	
+	public SimpleArtifactFinder(Properties systemProperties) {
+		super();
+		this.systemProperties = systemProperties;
+	}
+	
+	public File findLocalRepository(){
+		final File userM2Dir = new File(systemProperties.getProperty("user.home"), ".m2");
+		final File defaultSettingsPath = new File(userM2Dir, "settings.xml");
+		final File defaultRepoPath = new File(userM2Dir, "repository");
+		
+		final File repoPath;
+		if(defaultSettingsPath.exists()){
+			Settings s = Settings.read(defaultSettingsPath);
+			if(s.localRepository==null){
+				repoPath = defaultRepoPath;
+			}else{
+				repoPath = new File(s.localRepository);
+			}
+		}else{
+			repoPath= defaultRepoPath;
+		}
+		return repoPath;
+	}
+	
 	public File findLocal(SimpleArtifact artifact) {
 		return findLocal(artifact.getGroupId(), artifact.getArtifactId(), artifact.getVersion(), artifact.getClassifier(), artifact.getType());
 	}
 	
-	/**
-	 * Find an artifact file in the local repository. Assumes the local repository is located
-	 * at ${user.home}/.m2/repository.
-	 */
 	public File findLocal(String groupId, String artifactId, String version) {
 		return findLocal(groupId, artifactId, version, null, null);
 	}
 	
-	/**
-	 * Find an artifact file in the local repository. Assumes the local repository is located
-	 * at ${user.home}/.m2/repository.
-	 * @param groupId - required
-	 * @param artifactId - required
-	 * @param version - required
-	 * @param classifier - can be null, in which case this is ignored
-	 * @param type - if null, defaults to 'jar'
-	 * @returns The file of an artifact in the local repository.
-	 */
 	public File findLocal(String groupId, String artifactId, String version, String classifier, String type) {
 		StringBuffer path = new StringBuffer();
-		path.append(System.getProperty("user.home")).append("/.m2/repository/");
+		path.append(findLocalRepository().getAbsolutePath()).append("/");
 		
 		String[] groupPieces = groupId.split("\\.");
 		for (int i=0; i<groupPieces.length; i++) {
